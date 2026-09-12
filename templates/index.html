@@ -1,0 +1,53 @@
+{% extends "base.html" %}
+{% block title %}やることリスト | Todoリスト{% endblock %}
+{% block content %}
+<div class="page-head">
+  <h1>やることリスト</h1>
+  <a href="{{ url_for('new_todo') }}" class="btn btn-primary">＋ 新規登録</a>
+</div>
+
+{% if todos %}
+<ul class="todo-list">
+  {% for todo in todos %}
+  <li class="todo-card {% if todo.status == 'done' %}is-done{% endif %}">
+    <div class="todo-main">
+      <div class="todo-title-row">
+        <h3 class="todo-title">{{ todo.title }}</h3>
+        {% if todo.status == 'done' %}
+        <span class="badge badge-success">完了</span>
+        {% elif todo.due_date and todo.due_date < today %}
+        <span class="badge badge-overdue">期限超過</span>
+        {% endif %}
+      </div>
+      {% if todo.content %}
+      <p class="todo-content">{{ todo.content }}</p>
+      {% endif %}
+      {% if todo.due_date %}
+      <p class="todo-due {% if todo.status != 'done' and todo.due_date < today %}is-overdue{% endif %}">
+        期日: {{ todo.due_date | jp_date }}
+      </p>
+      {% endif %}
+    </div>
+    <div class="todo-actions">
+      <form method="post" action="{{ url_for('toggle_todo', todo_id=todo.id) }}">
+        <button type="submit" class="btn btn-outline btn-sm">
+          {% if todo.status == 'done' %}未完了に戻す{% else %}完了{% endif %}
+        </button>
+      </form>
+      <a href="{{ url_for('edit_todo', todo_id=todo.id) }}" class="btn btn-outline btn-sm">編集</a>
+      <form method="post" action="{{ url_for('delete_todo', todo_id=todo.id) }}"
+            onsubmit="return confirm('「{{ todo.title }}」を削除しますか？');">
+        <button type="submit" class="btn btn-ghost btn-sm">削除</button>
+      </form>
+    </div>
+  </li>
+  {% endfor %}
+</ul>
+{% else %}
+<div class="empty-state">
+  <p class="empty-title">やることはまだ登録されていません</p>
+  <p class="empty-sub">「新規登録」からやることを追加しましょう。</p>
+  <a href="{{ url_for('new_todo') }}" class="btn btn-primary">＋ 新規登録</a>
+</div>
+{% endif %}
+{% endblock %}

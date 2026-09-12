@@ -1,0 +1,310 @@
+/* デザイン仕様書（RCDL準拠）のデザイントークン */
+:root {
+  --brand1: #E2001A;
+  --brand1-hover: #BD0016;
+  --brand2: #808285;
+  --brand3: #FFFFFF;
+  --brand4: #F6F6F6;
+  --text: #444444;
+  --iconography: #767676;
+  --interface: #D7D7D7;
+  --interface-dark: #333333;
+  --success: #008900;
+  --error: #EE8B00;
+  --font: "RC TYPE", "Roboto", "Noto Sans JP", Avenir, Helvetica, Arial, sans-serif;
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  font-family: var(--font);
+  font-size: 16px;
+  line-height: 1.6;
+  color: var(--text);
+  background: var(--brand4);
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+.container {
+  max-width: 960px;
+  margin: 0 auto;
+  padding: 0 24px;
+  width: 100%;
+}
+
+/* ===== ヘッダー ===== */
+.site-header { background: var(--brand3); }
+
+.header-inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-top: 20px;
+  padding-bottom: 20px;
+}
+
+.logo {
+  font-size: 22px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  color: var(--brand1);
+  text-decoration: none;
+}
+.logo-dot { color: var(--interface-dark); }
+
+.nav { display: flex; gap: 32px; }
+
+.nav-link {
+  color: var(--text);
+  text-decoration: none;
+  text-transform: uppercase;
+  font-size: 14px;
+  font-weight: 500;
+  letter-spacing: 0.05em;
+  transition: color 0.3s linear; /* RCDL: 0.3s linear */
+}
+.nav-link:hover { color: var(--brand1); }
+
+.header-accent {
+  height: 3px;
+  background: var(--brand1);
+}
+
+/* ===== メイン ===== */
+.main {
+  flex: 1;
+  padding-top: 32px;
+  padding-bottom: 48px;
+}
+
+.page-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+h1 {
+  font-size: 32px;
+  font-weight: 700;
+  margin: 0;
+  color: var(--text);
+}
+
+/* ===== ボタン（RCDL: ピル型・uppercase・0.3s linear・hover 15% darken） ===== */
+.btn {
+  display: inline-block;
+  border-radius: 9999px;
+  padding: 12px 24px;
+  font-family: var(--font);
+  font-size: 14px;
+  font-weight: 500;
+  letter-spacing: 0.05em;
+  text-decoration: none;
+  text-align: center;
+  cursor: pointer;
+  border: 1px solid transparent;
+  transition: background-color 0.3s linear, color 0.3s linear, border-color 0.3s linear;
+}
+
+.btn-primary {
+  background: var(--brand1);
+  color: var(--brand3);
+}
+.btn-primary:hover, .btn-primary:active { background: var(--brand1-hover); }
+
+.btn-outline {
+  background: var(--brand3);
+  color: var(--brand1);
+  border-color: var(--brand1);
+}
+.btn-outline:hover { background: #FBE5E8; }
+
+.btn-ghost {
+  background: transparent;
+  color: var(--iconography);
+  border-color: var(--interface);
+}
+.btn-ghost:hover { color: var(--brand1); border-color: var(--brand1); }
+
+.btn-sm { padding: 8px 16px; font-size: 13px; }
+
+/* ===== アラート ===== */
+.alert {
+  padding: 12px 16px;
+  margin-bottom: 16px;
+  border-radius: 4px;
+  font-size: 14px;
+  background: var(--brand3);
+}
+.alert-success { border-left: 4px solid var(--success); color: var(--success); }
+.alert-error, .alert-warning { border-left: 4px solid var(--error); color: #9A5A00; }
+
+/* ===== Todoカード ===== */
+.todo-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.todo-card {
+  background: var(--brand3);
+  border: 1px solid var(--interface);
+  border-radius: 8px;
+  padding: 20px 24px;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 16px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+.todo-card.is-done { opacity: 0.75; }
+.todo-card.is-done .todo-title { text-decoration: line-through; color: var(--iconography); }
+
+.todo-main { min-width: 0; }
+
+.todo-title-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.todo-title {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 500;
+  color: var(--text);
+  overflow-wrap: anywhere;
+}
+
+.todo-content {
+  margin: 8px 0 0;
+  color: var(--iconography);
+  font-size: 14px;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+.todo-due {
+  margin: 8px 0 0;
+  font-size: 13px;
+  color: var(--iconography);
+}
+.todo-due.is-overdue { color: var(--error); font-weight: 500; }
+
+.badge {
+  display: inline-block;
+  border-radius: 9999px;
+  padding: 2px 12px;
+  font-size: 12px;
+  font-weight: 500;
+}
+.badge-success { background: #E6F4E6; color: var(--success); }
+.badge-overdue { background: #FDF0DE; color: #9A5A00; }
+
+.todo-actions {
+  display: flex;
+  gap: 8px;
+  flex-shrink: 0;
+  align-items: center;
+}
+.todo-actions form { margin: 0; }
+
+/* ===== 空状態 ===== */
+.empty-state {
+  background: var(--brand3);
+  border: 1px solid var(--interface);
+  border-radius: 8px;
+  text-align: center;
+  padding: 64px 24px;
+}
+.empty-title { font-size: 20px; font-weight: 500; margin: 0 0 8px; }
+.empty-sub { color: var(--iconography); margin: 0 0 24px; }
+
+/* ===== フォーム ===== */
+.todo-form {
+  background: var(--brand3);
+  border: 1px solid var(--interface);
+  border-radius: 8px;
+  padding: 32px;
+  max-width: 640px;
+}
+
+.form-field { margin-bottom: 24px; }
+
+.form-field label {
+  display: block;
+  font-size: 14px;
+  font-weight: 500;
+  margin-bottom: 8px;
+}
+
+.required {
+  color: var(--brand1);
+  font-size: 12px;
+  margin-left: 8px;
+}
+
+.form-field input[type="text"],
+.form-field input[type="date"],
+.form-field textarea {
+  width: 100%;
+  padding: 10px 12px;
+  font-family: var(--font);
+  font-size: 16px;
+  color: var(--text);
+  background: var(--brand3);
+  border: 1px solid var(--interface);
+  border-radius: 4px;
+  transition: border-color 0.3s linear;
+}
+.date-input { max-width: 220px; }
+
+.form-field input:focus,
+.form-field textarea:focus {
+  outline: none;
+  border-color: var(--brand1);
+  box-shadow: 0 0 0 2px rgba(226, 0, 26, 0.12);
+}
+
+.form-field .has-error { border-color: var(--error); }
+
+.field-error {
+  color: var(--error);
+  font-size: 13px;
+  margin: 6px 0 0;
+}
+
+.form-actions {
+  display: flex;
+  gap: 12px;
+  margin-top: 32px;
+}
+
+/* ===== フッター ===== */
+.site-footer {
+  background: var(--interface-dark);
+  color: var(--brand4);
+  font-size: 13px;
+  padding: 20px 0;
+  margin-top: auto;
+}
+.site-footer p { margin: 0; }
+
+/* ===== レスポンシブ ===== */
+@media (max-width: 767px) {
+  .todo-card { flex-direction: column; }
+  .todo-actions { width: 100%; flex-wrap: wrap; }
+  .page-head { flex-direction: column; align-items: flex-start; }
+  h1 { font-size: 26px; }
+  .todo-form { padding: 24px 16px; }
+}

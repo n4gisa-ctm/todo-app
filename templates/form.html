@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+{% block title %}{{ '編集' if mode == 'edit' else '新規登録' }} | Todoリスト{% endblock %}
+{% block content %}
+<div class="page-head">
+  <h1>{{ 'やることを編集' if mode == 'edit' else 'やることを登録' }}</h1>
+</div>
+
+<form method="post" class="todo-form" novalidate>
+  <div class="form-field">
+    <label for="title">タイトル <span class="required">必須</span></label>
+    <input type="text" id="title" name="title" maxlength="100"
+           value="{{ todo.title if todo else '' }}"
+           class="{% if errors.title %}has-error{% endif %}" required>
+    {% if errors.title %}<p class="field-error">{{ errors.title }}</p>{% endif %}
+  </div>
+
+  <div class="form-field">
+    <label for="content">内容</label>
+    <textarea id="content" name="content" rows="5" maxlength="1000"
+              class="{% if errors.content %}has-error{% endif %}">{{ todo.content if todo else '' }}</textarea>
+    {% if errors.content %}<p class="field-error">{{ errors.content }}</p>{% endif %}
+  </div>
+
+  <div class="form-field">
+    <label for="due_date">期日</label>
+    <input type="date" id="due_date" name="due_date"
+           value="{{ todo.due_date if todo else '' }}"
+           class="date-input {% if errors.due_date %}has-error{% endif %}">
+    {% if errors.due_date %}<p class="field-error">{{ errors.due_date }}</p>{% endif %}
+  </div>
+
+  <div class="form-actions">
+    <button type="submit" class="btn btn-primary">{{ '更新する' if mode == 'edit' else '登録する' }}</button>
+    <a href="{{ url_for('index') }}" class="btn btn-outline">キャンセル</a>
+  </div>
+</form>
+{% endblock %}

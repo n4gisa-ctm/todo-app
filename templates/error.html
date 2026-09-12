@@ -1,0 +1,9 @@
+{% extends "base.html" %}
+{% block title %}エラー | Todoリスト{% endblock %}
+{% block content %}
+<div class="empty-state">
+  <p class="empty-title">エラーが発生しました</p>
+  <p class="empty-sub">{{ message }}</p>
+  <a href="{{ url_for('index') }}" class="btn btn-primary">一覧へ戻る</a>
+</div>
+{% endblock %}

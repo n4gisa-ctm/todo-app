@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{% block title %}Todoリスト{% endblock %}</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+  <header class="site-header">
+    <div class="container header-inner">
+      <a href="{{ url_for('index') }}" class="logo">MY TODO<span class="logo-dot">.</span></a>
+      <nav class="nav">
+        <a href="{{ url_for('index') }}" class="nav-link">一覧</a>
+        <a href="{{ url_for('new_todo') }}" class="nav-link">新規登録</a>
+      </nav>
+    </div>
+    <div class="header-accent"></div>
+  </header>
+
+  <main class="container main">
+    {% if not using_sheets %}
+    <div class="alert alert-warning">
+      開発モード: Google スプレッドシート未接続のため、データはローカルファイルに保存されています。（SETUP.md参照）
+    </div>
+    {% endif %}
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% for category, message in messages %}
+      <div class="alert alert-{{ category }}">{{ message }}</div>
+      {% endfor %}
+    {% endwith %}
+
+    {% block content %}{% endblock %}
+  </main>
+
+  <footer class="site-footer">
+    <div class="container">
+      <p>Todoリストアプリ — powered by Flask + Google Sheets</p>
+    </div>
+  </footer>
+</body>
+</html>
