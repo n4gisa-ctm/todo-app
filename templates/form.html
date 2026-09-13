@@ -29,6 +29,17 @@
     {% if errors.due_date %}<p class="field-error">{{ errors.due_date }}</p>{% endif %}
   </div>
 
+  <div class="form-field">
+    <label for="repeat">繰り返し</label>
+    <select id="repeat" name="repeat" class="repeat-select {% if errors.repeat %}has-error{% endif %}">
+      <option value="" {% if not todo or not todo.repeat %}selected{% endif %}>なし</option>
+      <option value="weekly" {% if todo and todo.repeat == 'weekly' %}selected{% endif %}>毎週</option>
+      <option value="monthly" {% if todo and todo.repeat == 'monthly' %}selected{% endif %}>毎月</option>
+    </select>
+    <p class="field-hint">毎週/毎月を選ぶと、完了時に次回のタスクが自動で作成されます（期日の入力が必要です）</p>
+    {% if errors.repeat %}<p class="field-error">{{ errors.repeat }}</p>{% endif %}
+  </div>
+
   <div class="form-actions">
     <button type="submit" class="btn btn-primary">{{ '更新する' if mode == 'edit' else '登録する' }}</button>
     <a href="{{ url_for('index') }}" class="btn btn-outline">キャンセル</a>

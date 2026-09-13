@@ -1,6 +1,13 @@
 {% extends "base.html" %}
 {% block title %}やることリスト | Todoリスト{% endblock %}
 {% block content %}
+{% if settings.reminder == 'on' and due_todos %}
+<div class="alert alert-reminder">
+  🔔 リマインダー: 期日が今日まで（期限超過含む）の未完了タスクが {{ due_todos | length }} 件あります —
+  {% for t in due_todos[:3] %}「{{ t.title }}」{% endfor %}{% if due_todos | length > 3 %} ほか{% endif %}
+</div>
+{% endif %}
+
 <div class="page-head">
   <h1>やることリスト</h1>
   <a href="{{ url_for('new_todo') }}" class="btn btn-primary">＋ 新規登録</a>
@@ -17,6 +24,9 @@
         <span class="badge badge-success">完了</span>
         {% elif todo.due_date and todo.due_date < today %}
         <span class="badge badge-overdue">期限超過</span>
+        {% endif %}
+        {% if todo.repeat in repeat_labels %}
+        <span class="badge badge-repeat">🔁 {{ repeat_labels[todo.repeat] }}</span>
         {% endif %}
       </div>
       {% if todo.content %}
@@ -49,5 +59,32 @@
   <p class="empty-sub">「新規登録」からやることを追加しましょう。</p>
   <a href="{{ url_for('new_todo') }}" class="btn btn-primary">＋ 新規登録</a>
 </div>
+{% endif %}
+
+{% if settings.reminder == 'on' and due_todos %}
+<script>
+  // リマインダーのブラウザ通知（要件定義書 F-11: 1日1回まで）
+  (function () {
+    if (!("Notification" in window)) return;
+    var key = "reminder_notified_date";
+    var todayStr = {{ today | tojson }};
+    try {
+      if (localStorage.getItem(key) === todayStr) return;
+    } catch (e) { /* localStorage不可の環境では毎回通知を試みる */ }
+    var titles = {{ due_todos | map(attribute='title') | list | tojson }};
+    var body = titles.slice(0, 3).join("、") + (titles.length > 3 ? " ほか" : "");
+    function notify() {
+      new Notification("📋 期日のタスクが" + titles.length + "件あります", { body: body });
+      try { localStorage.setItem(key, todayStr); } catch (e) {}
+    }
+    if (Notification.permission === "granted") {
+      notify();
+    } else if (Notification.permission !== "denied") {
+      Notification.requestPermission().then(function (p) {
+        if (p === "granted") notify();
+      });
+    }
+  })();
+</script>
 {% endif %}
 {% endblock %}

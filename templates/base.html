@@ -8,6 +8,12 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+  <style>
+    :root {
+      --brand1: {{ theme.primary }};
+      --brand1-hover: {{ theme.hover }};
+    }
+  </style>
 </head>
 <body>
   <header class="site-header">
@@ -16,6 +22,7 @@
       <nav class="nav">
         <a href="{{ url_for('index') }}" class="nav-link">一覧</a>
         <a href="{{ url_for('new_todo') }}" class="nav-link">新規登録</a>
+        <a href="{{ url_for('settings_page') }}" class="nav-link">設定</a>
       </nav>
     </div>
     <div class="header-accent"></div>

@@ -10,10 +10,13 @@ import uuid
 from datetime import datetime, timezone
 from pathlib import Path
 
-HEADERS = ["id", "title", "content", "due_date", "status", "created_at", "updated_at"]
+HEADERS = ["id", "title", "content", "due_date", "status", "created_at", "updated_at", "repeat"]
 WORKSHEET_NAME = "todos"
+SETTINGS_WORKSHEET = "settings"
+DEFAULT_SETTINGS = {"theme": "red", "reminder": "off"}
 
 _LOCAL_FILE = Path(__file__).parent / "data" / "todos.json"
+_LOCAL_SETTINGS_FILE = Path(__file__).parent / "data" / "settings.json"
 
 
 def _now() -> str:
@@ -27,7 +30,10 @@ class LocalStore:
 
     def _load(self):
         if _LOCAL_FILE.exists():
-            return json.loads(_LOCAL_FILE.read_text(encoding="utf-8"))
+            todos = json.loads(_LOCAL_FILE.read_text(encoding="utf-8"))
+            for t in todos:
+                t.setdefault("repeat", "")
+            return todos
         return []
 
     def _save(self, todos):
@@ -42,7 +48,7 @@ class LocalStore:
     def get_todo(self, todo_id):
         return next((t for t in self._load() if t["id"] == todo_id), None)
 
-    def add_todo(self, title, content, due_date):
+    def add_todo(self, title, content, due_date, repeat=""):
         todos = self._load()
         todo = {
             "id": uuid.uuid4().hex,
@@ -52,6 +58,7 @@ class LocalStore:
             "status": "open",
             "created_at": _now(),
             "updated_at": _now(),
+            "repeat": repeat,
         }
         todos.append(todo)
         self._save(todos)
@@ -73,6 +80,21 @@ class LocalStore:
         self._save(remaining)
         return len(remaining) != len(todos)
 
+    def get_settings(self):
+        settings = dict(DEFAULT_SETTINGS)
+        if _LOCAL_SETTINGS_FILE.exists():
+            settings.update(json.loads(_LOCAL_SETTINGS_FILE.read_text(encoding="utf-8")))
+        return settings
+
+    def save_settings(self, settings):
+        merged = self.get_settings()
+        merged.update(settings)
+        _LOCAL_SETTINGS_FILE.parent.mkdir(parents=True, exist_ok=True)
+        _LOCAL_SETTINGS_FILE.write_text(
+            json.dumps(merged, ensure_ascii=False, indent=2), encoding="utf-8"
+        )
+        return merged
+
 
 class SheetsStore:
     """Google スプレッドシートに保存する本番用ストア。"""
@@ -86,13 +108,16 @@ class SheetsStore:
         scopes = ["https://www.googleapis.com/auth/spreadsheets"]
         creds = Credentials.from_service_account_info(credentials_info, scopes=scopes)
         client = gspread.authorize(creds)
-        spreadsheet = client.open_by_key(spreadsheet_id)
+        self.spreadsheet = client.open_by_key(spreadsheet_id)
         try:
-            self.ws = spreadsheet.worksheet(WORKSHEET_NAME)
+            self.ws = self.spreadsheet.worksheet(WORKSHEET_NAME)
         except gspread.WorksheetNotFound:
-            self.ws = spreadsheet.add_worksheet(WORKSHEET_NAME, rows=1000, cols=len(HEADERS))
+            self.ws = self.spreadsheet.add_worksheet(WORKSHEET_NAME, rows=1000, cols=len(HEADERS))
+        # v1.0（G列まで）のシートもここでヘッダーがH列まで拡張される
         if self.ws.row_values(1) != HEADERS:
             self.ws.update(values=[HEADERS], range_name="A1")
+        self._settings_ws = None
+        self._settings_cache = None
 
     def _rows(self):
         """(行番号, dict) のリストを返す。2行目以降がデータ。"""
@@ -111,7 +136,7 @@ class SheetsStore:
     def get_todo(self, todo_id):
         return next((t for _, t in self._rows() if t["id"] == todo_id), None)
 
-    def add_todo(self, title, content, due_date):
+    def add_todo(self, title, content, due_date, repeat=""):
         todo = {
             "id": uuid.uuid4().hex,
             "title": title,
@@ -120,18 +145,20 @@ class SheetsStore:
             "status": "open",
             "created_at": _now(),
             "updated_at": _now(),
+            "repeat": repeat,
         }
         self.ws.append_row([todo[h] for h in HEADERS], value_input_option="RAW")
         return todo
 
     def update_todo(self, todo_id, **fields):
+        last_col = chr(ord("A") + len(HEADERS) - 1)
         for row_num, todo in self._rows():
             if todo["id"] == todo_id:
                 todo.update({k: v for k, v in fields.items() if k in HEADERS})
                 todo["updated_at"] = _now()
                 self.ws.update(
                     values=[[todo[h] for h in HEADERS]],
-                    range_name=f"A{row_num}:G{row_num}",
+                    range_name=f"A{row_num}:{last_col}{row_num}",
                     value_input_option="RAW",
                 )
                 return todo
@@ -143,6 +170,38 @@ class SheetsStore:
                 self.ws.delete_rows(row_num)
                 return True
         return False
+
+    def _get_settings_ws(self):
+        import gspread
+
+        if self._settings_ws is None:
+            try:
+                self._settings_ws = self.spreadsheet.worksheet(SETTINGS_WORKSHEET)
+            except gspread.WorksheetNotFound:
+                self._settings_ws = self.spreadsheet.add_worksheet(
+                    SETTINGS_WORKSHEET, rows=20, cols=2
+                )
+                self._settings_ws.update(values=[["key", "value"]], range_name="A1")
+        return self._settings_ws
+
+    def get_settings(self):
+        if self._settings_cache is None:
+            settings = dict(DEFAULT_SETTINGS)
+            for row in self._get_settings_ws().get_all_values()[1:]:
+                if len(row) >= 2 and row[0]:
+                    settings[row[0]] = row[1]
+            self._settings_cache = settings
+        return dict(self._settings_cache)
+
+    def save_settings(self, settings):
+        merged = self.get_settings()
+        merged.update(settings)
+        ws = self._get_settings_ws()
+        rows = [["key", "value"]] + [[k, v] for k, v in sorted(merged.items())]
+        ws.clear()
+        ws.update(values=rows, range_name="A1", value_input_option="RAW")
+        self._settings_cache = merged
+        return dict(merged)
 
 
 def create_store():

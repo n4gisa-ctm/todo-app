@@ -1,0 +1,52 @@
+{% extends "base.html" %}
+{% block title %}設定 | Todoリスト{% endblock %}
+{% block content %}
+<div class="page-head">
+  <h1>設定</h1>
+</div>
+
+<form method="post" class="todo-form settings-form">
+  <div class="form-field">
+    <label>テーマカラー</label>
+    <p class="field-hint">アプリ全体のアクセントカラーを選べます</p>
+    <div class="theme-grid">
+      {% for id, t in themes.items() %}
+      <label class="theme-option" title="{{ t.name }}">
+        <input type="radio" name="theme" value="{{ id }}"
+               {% if settings.theme == id %}checked{% endif %}>
+        <span class="theme-swatch" style="background: {{ t.primary }};"></span>
+        <span class="theme-name">{{ t.name }}</span>
+      </label>
+      {% endfor %}
+    </div>
+  </div>
+
+  <div class="form-field">
+    <label>リマインダー</label>
+    <label class="toggle-row">
+      <input type="checkbox" id="reminder" name="reminder" value="on"
+             {% if settings.reminder == 'on' %}checked{% endif %}>
+      <span class="toggle-track"><span class="toggle-thumb"></span></span>
+      <span>期日のタスクを通知する</span>
+    </label>
+    <p class="field-hint">
+      オンにすると、一覧ページを開いた際に「期日が今日」または「期限超過」の未完了タスクを
+      画面内バナーとブラウザ通知でお知らせします（ブラウザ通知は1日1回・通知の許可が必要です）
+    </p>
+  </div>
+
+  <div class="form-actions">
+    <button type="submit" class="btn btn-primary">保存する</button>
+    <a href="{{ url_for('index') }}" class="btn btn-outline">一覧へ戻る</a>
+  </div>
+</form>
+
+<script>
+  // リマインダーをオンにした時点でブラウザに通知許可をリクエスト（F-11）
+  document.getElementById("reminder").addEventListener("change", function () {
+    if (this.checked && "Notification" in window && Notification.permission === "default") {
+      Notification.requestPermission();
+    }
+  });
+</script>
+{% endblock %}
